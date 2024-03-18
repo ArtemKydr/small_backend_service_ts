@@ -17,7 +17,7 @@ class Database {
         }
     }
 
-    public getRepository<T>(entity: EntityTarget<T>): Repository<T> {
+    public getRepository<T extends object>(entity: EntityTarget<T>): Repository<T> {
         if (!this.connection) {
             throw new Error('Database connection not established');
         }
