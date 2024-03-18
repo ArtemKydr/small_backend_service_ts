@@ -1,4 +1,5 @@
 import { createConnection, Connection, EntityTarget, Repository } from 'typeorm';
+import config from '../config/dbConfig';
 
 class Database {
     private connection: Connection | undefined;
@@ -9,7 +10,7 @@ class Database {
 
     public async initializeDb(): Promise<void> {
         try {
-            this.connection = await createConnection();
+            this.connection = await createConnection(config);
             console.log('Connected to db');
         } catch (error) {
             console.error('Error connecting to database:', error);
@@ -17,7 +18,12 @@ class Database {
         }
     }
 
-    public getRepository<T extends object>(entity: EntityTarget<T>): Repository<T> {
+    public async getRepository<T extends object>(entity: EntityTarget<T>): Promise<Repository<T>> {
+        if (!this.connection) {
+            console.warn('Waiting for database connection...');
+            await this.initializeDb();
+        }
+
         if (!this.connection) {
             throw new Error('Database connection not established');
         }
@@ -27,5 +33,4 @@ class Database {
 }
 
 const db = new Database();
-db.initializeDb().then(() => console.log('Database initialization successful'));
 export default db;

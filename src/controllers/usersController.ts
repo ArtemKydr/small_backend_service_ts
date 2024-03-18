@@ -1,12 +1,23 @@
 import { Request, Response } from 'express';
-import usersModel from '../models/User';
+import UserModel from '../models/User';
 
-const getUsers = async (req: Request, res: Response) => {
+class UsersController {
+    private userModel: UserModel;
 
-    const users = await usersModel.getList({...req.params, ...req.query});
-    res.json(users);
-};
+    constructor() {
+        this.userModel = new UserModel();
+    }
 
-export {
-    getUsers
+    async getUsers(req: Request, res: Response) {
+        try {
+            await this.userModel.initializeRepository();
+            const users = await this.userModel.getList({...req.params, ...req.query});
+            res.json({users});
+        } catch (error) {
+            console.error('Error getting users:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
 }
+
+export default UsersController;
